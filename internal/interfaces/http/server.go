@@ -4,7 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/gin-gonic/gin"
-	services "gophermart.ru/internal/interfaces/services/user"
+	"gophermart.ru/internal/interfaces/services"
 )
 
 type Server struct {
@@ -35,13 +35,8 @@ func New() (*Server, error) {
 	})
 	server.Engine.Use(Midleware)
 	server.Engine.Use(Midleware2)
-	api := server.Engine.Group("api")
-	services.Login(api.Group("/user/login"))
-	services.Registrators(api.Group("/user/registrators"))
-	services.Balance(api.Group("/user/balance"))
 
-	services.Orders(api.Group("/user/orders"))
-	services.Withdrawals(api.Group("/user/withdrawals"))
+	services.User(server.Engine.Group("api/user"))
 
 	routes := server.Engine.Routes()
 	slog.Info("Зарегистрированные маршруты:")

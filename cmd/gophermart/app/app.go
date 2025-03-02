@@ -1,6 +1,7 @@
 package app
 
 import (
+	config "gophermart.ru/internal"
 	storage "gophermart.ru/internal/infrastructure/storage"
 	interfaces "gophermart.ru/internal/interfaces/http"
 )
@@ -11,10 +12,15 @@ type App struct {
 }
 
 func New() (*App, error) {
+	var err error
+
+	if _, err = config.ParseFlags(); err != nil {
+		return nil, err
+	}
+
 	app := &App{}
 
-	var err error
-	if app.storage, err = storage.NewDatabase("host=localhost user=username password=123321 dbname=echo9et sslmode=disable"); err != nil {
+	if app.storage, err = storage.NewDatabase(config.Get().AddrDatabase); err != nil {
 		return nil, err
 	}
 
