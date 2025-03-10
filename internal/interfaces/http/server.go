@@ -4,15 +4,31 @@ import (
 	"log/slog"
 
 	"github.com/gin-gonic/gin"
+	config "gophermart.ru/internal"
+	"gophermart.ru/internal/infrastructure/storage"
 	"gophermart.ru/internal/interfaces/services"
 )
 
 type Server struct {
 	Engine *gin.Engine
+	db     *storage.Database
+}
+
+type DataBaser interface {
+}
+
+type ServerRouter interface {
 }
 
 func New() (*Server, error) {
 	server := &Server{}
+	db, err := storage.NewDatabase(config.GetAddrDatabase())
+
+	if err != nil {
+		slog.Error(err.Error())
+		return nil, err
+	}
+	server.db = db
 	gin.SetMode(gin.ReleaseMode)
 
 	server.Engine = gin.New()
@@ -33,10 +49,10 @@ func New() (*Server, error) {
 		ctx.Header("Content-Type", "application/json")
 		ctx.Next()
 	})
-	server.Engine.Use(Midleware)
+	server.Engine.Use(MidlewareAuth)
 	server.Engine.Use(Midleware2)
 
-	services.User(server.Engine.Group("api/user"))
+	services.User(server.Engine.Group("api/user"), server.db)
 
 	routes := server.Engine.Routes()
 	slog.Info("Зарегистрированные маршруты:")

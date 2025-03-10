@@ -2,9 +2,9 @@ package storage
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"gophermart.ru/internal/entities"
 )
 
 type Database struct {
@@ -24,16 +24,65 @@ func NewDatabase(addr string) (*Database, error) {
 func (db *Database) Open(addr string) error {
 	conn, err := sql.Open("pgx", addr)
 	if err != nil {
-		fmt.Println("---", err)
 		return err
 	}
 
 	db.conn = conn
 
-	// if err := b.InitTable(); err != nil {
-	// 	fmt.Println("---", err)
-	// 	return err
-	// }
-	return nil
+	if err := db.InitTable(); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (db *Database) InitTable() error {
+	_, err := db.conn.Exec(
+		`CREATE TABLE IF NOT EXISTS users (
+		id SERIAL PRIMARY KEY,
+		name VARCHAR(255) NOT NULL UNIQUE,
+		password VARCHAR(255) NOT NULL);`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.conn.Exec(
+		`CREATE TABLE IF NOT EXISTS status_orders (
+		id SERIAL PRIMARY KEY,
+		name VARCHAR(255)  NOT NULL UNIQUE);`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.conn.Exec(
+		`CREATE TABLE IF NOT EXISTS orders (
+		id SERIAL PRIMARY KEY,
+		number VARCHAR(255) NOT NULL UNIQUE,
+		id_user VARCHAR(255) NOT NULL,
+		status VARCHAR(255) NOT NULL);`)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *Database) InsertUser(user entities.User) error {
+	_, err := db.conn.Exec("INSERT INTO users (name, password) VALUES ($1, $2)",
+		user.Login, user.HashPassword)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *Database) User(login string) (*entities.User, error) {
+	var user entities.User
+	err := db.conn.QueryRow("SELECT id, name, password FROM users WHERE name = $1", login).Scan(&user.Id, &user.Login, &user.HashPassword)
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

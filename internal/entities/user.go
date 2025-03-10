@@ -1,6 +1,16 @@
 package entities
 
 type User struct {
-	Login    int    `json:"login"`
-	Password string `json:"password"`
+	Id           int    `json:"id"`
+	Login        string `json:"login"`
+	HashPassword string `json:"password"`
+}
+
+func (u *User) IsEcual(user *User) bool {
+	return u.Login == user.Login && u.HashPassword == user.HashPassword
+}
+
+type UserManagment interface {
+	InsertUser(User) error
+	User(login string) (*User, error)
 }

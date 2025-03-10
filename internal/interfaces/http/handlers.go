@@ -1,12 +1,25 @@
 package interfaces
 
 import (
+	"errors"
+	"fmt"
 	"log/slog"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func Midleware(ctx *gin.Context) {
+func MidlewareAuth(ctx *gin.Context) {
+	if ctx.Request.URL.Path == "/api/user/login" || ctx.Request.URL.Path == "/api/user/register" {
+		ctx.Next()
+		return
+	}
+	token, err := ctx.Cookie("token")
+	if err != nil {
+		ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
+		return
+	}
+	fmt.Println("jwt", token)
 	slog.Info(ctx.Request.Method)
 	ctx.Next()
 }

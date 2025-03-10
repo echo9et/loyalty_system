@@ -5,18 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	config "gophermart.ru/internal"
 	"gophermart.ru/internal/entities"
 	"gophermart.ru/internal/utils"
 )
 
-type Claims struct {
-	Login string `json:"login"`
-	jwt.RegisteredClaims
-}
-
-func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
+func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 	group.POST("", func(ctx *gin.Context) {
 		var user entities.User
 
@@ -37,17 +31,10 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 		}
 		user.HashPassword = utils.Sha256hash(user.HashPassword)
 
-		u, err := mngr.User(user.Login)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Bad Request",
-			})
-			return
-		}
-
-		if !user.IsEcual(u) {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Неверный пароль или логин",
+		if err := mngr.InsertUser(user); err != nil {
+			slog.Error(err.Error())
+			ctx.JSON(http.StatusConflict, gin.H{
+				"error": "логин занят",
 			})
 			return
 		}
@@ -64,7 +51,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 		ctx.SetCookie("token", token, int(config.Get().AliveToken), "", "", false, true)
 
 		ctx.JSON(200, gin.H{
-			"result": "success",
+			"result": "ok",
 		})
 	})
 }
