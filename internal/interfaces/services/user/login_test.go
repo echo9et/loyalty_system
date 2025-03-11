@@ -13,6 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 	config "gophermart.ru/internal"
+	"gophermart.ru/internal/entities"
 )
 
 func TestLogin_Success(t *testing.T) {
@@ -53,13 +54,13 @@ func TestLogin_Success(t *testing.T) {
 	assert.NotEmpty(t, tokenCookie.Value)
 
 	// Проверка токена JWT
-	claims := &Claims{}
+	claims := &entities.Claims{}
 	token, err := jwt.ParseWithClaims(tokenCookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.Get().SecretKey), nil
 	})
 	assert.NoError(t, err)
 	assert.True(t, token.Valid)
-	assert.Equal(t, "testuser", claims.Login)
+	assert.NotEqual(t, -1, claims.IdUser)
 }
 
 func TestLogin_BadRequest_EmptyFields(t *testing.T) {

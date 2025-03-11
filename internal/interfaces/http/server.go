@@ -45,7 +45,6 @@ func New() (*Server, error) {
 		c.Next()
 	})
 	server.Engine.Use(func(ctx *gin.Context) {
-		print("test\n")
 		ctx.Header("Content-Type", "application/json")
 		ctx.Next()
 	})

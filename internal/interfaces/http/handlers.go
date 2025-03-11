@@ -2,7 +2,6 @@ package interfaces
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -14,13 +13,14 @@ func MidlewareAuth(ctx *gin.Context) {
 		ctx.Next()
 		return
 	}
-	token, err := ctx.Cookie("token")
+
+	_, err := ctx.Cookie("token")
 	if err != nil {
+		slog.Error(err.Error())
 		ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
 		return
 	}
-	fmt.Println("jwt", token)
-	slog.Info(ctx.Request.Method)
+
 	ctx.Next()
 }
 

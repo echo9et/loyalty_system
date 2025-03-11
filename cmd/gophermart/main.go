@@ -14,6 +14,9 @@ func main() {
 		slog.Error(fmt.Sprintln(err))
 		return
 	}
-	app.Start("127.0.0.1:8000")
-	fmt.Println("end")
+	err = app.Start("127.0.0.1:8000")
+
+	if err != nil {
+		slog.Error(err.Error())
+	}
 }

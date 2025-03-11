@@ -5,16 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	config "gophermart.ru/internal"
 	"gophermart.ru/internal/entities"
 	"gophermart.ru/internal/utils"
 )
-
-type Claims struct {
-	Login string `json:"login"`
-	jwt.RegisteredClaims
-}
 
 func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 	group.POST("", func(ctx *gin.Context) {
@@ -52,7 +46,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 			return
 		}
 
-		token, err := getToken(&user)
+		token, err := getToken(u)
 		if err != nil {
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -60,9 +54,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 			})
 			return
 		}
-
-		ctx.SetCookie("token", token, int(config.Get().AliveToken), "", "", false, true)
-
+		ctx.SetCookie("token", token, int(config.Get().AliveToken), "/", "", false, true)
 		ctx.JSON(200, gin.H{
 			"result": "success",
 		})

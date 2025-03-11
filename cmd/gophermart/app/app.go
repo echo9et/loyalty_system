@@ -31,6 +31,10 @@ func New() (*App, error) {
 	return app, nil
 }
 
-func (a *App) Start(sAddress string) {
-	a.server.Engine.Run(sAddress)
+func (a *App) Start(addr string) error {
+	err := a.server.Engine.Run(addr)
+	if err != nil {
+		return err
+	}
+	return nil
 }
