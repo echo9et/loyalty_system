@@ -5,7 +5,6 @@ go 1.22
 require (
 	github.com/gin-gonic/gin v1.8.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/golang/mock v1.6.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.5.0

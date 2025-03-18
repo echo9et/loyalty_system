@@ -30,5 +30,5 @@ func LoginFromToken(sToken string) (int, error) {
 		return -1, errors.New("no valid token")
 	}
 	fmt.Println("OK")
-	return claims.IdUser, nil
+	return claims.IDUser, nil
 }

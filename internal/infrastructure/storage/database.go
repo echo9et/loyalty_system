@@ -82,7 +82,7 @@ func (db *Database) User(login string) (*entities.User, error) {
 	var user entities.User
 	err := db.conn.QueryRow(
 		"SELECT id, name, password FROM users WHERE name = $1", login).
-		Scan(&user.Id, &user.Login, &user.HashPassword)
+		Scan(&user.ID, &user.Login, &user.HashPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -97,7 +97,7 @@ func (db *Database) Order(number string) (*entities.Order, error) {
 	var order entities.Order
 	err := db.conn.QueryRow(
 		"SELECT number, id_user, status FROM orders WHERE number = $1", number).
-		Scan(&order.Number, &order.IdUser, &order.Status)
+		Scan(&order.Number, &order.IDUser, &order.Status)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -111,7 +111,7 @@ func (db *Database) Order(number string) (*entities.Order, error) {
 func (db *Database) AddOrder(order entities.Order) error {
 	_, err := db.conn.Exec(
 		"INSERT INTO orders (number, id_user, status) VALUES ($1, $2, $3)",
-		order.Number, order.IdUser, order.Status)
+		order.Number, order.IDUser, order.Status)
 	if err != nil {
 		return err
 	}

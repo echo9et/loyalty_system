@@ -3,12 +3,12 @@ package entities
 import "github.com/golang-jwt/jwt/v5"
 
 type Claims struct {
-	IdUser int `json:"id_user"`
+	IDUser int `json:"id_user"`
 	jwt.RegisteredClaims
 }
 
 type User struct {
-	Id           int    `json:"id"`
+	ID           int    `json:"id"`
 	Login        string `json:"login"`
 	HashPassword string `json:"password"`
 }
@@ -24,7 +24,7 @@ type UserManagment interface {
 
 type Order struct {
 	Number string
-	IdUser int
+	IDUser int
 	Status string
 }
 

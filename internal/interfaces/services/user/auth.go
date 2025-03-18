@@ -13,7 +13,7 @@ import (
 func getToken(u *entities.User) (string, error) {
 	expirationTime := time.Now().Add(config.Get().AliveToken)
 	claims := &entities.Claims{
-		IdUser: u.Id,
+		IDUser: u.ID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -25,7 +25,7 @@ func getToken(u *entities.User) (string, error) {
 		slog.Error(fmt.Sprintf("getToken %s", err))
 		return "", err
 	}
-	fmt.Printf("getToken USER id: %d\n", claims.IdUser)
+	fmt.Printf("getToken USER id: %d\n", claims.IDUser)
 
 	return tokenString, nil
 }

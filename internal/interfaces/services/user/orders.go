@@ -54,16 +54,16 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 			return
 		}
 
-		idUser, err := utils.LoginFromToken(token)
-		if (err != nil) || (idUser == -1) {
+		IDUser, err := utils.LoginFromToken(token)
+		if (err != nil) || (IDUser == -1) {
 			ctx.AbortWithError(http.StatusUnauthorized,
 				errors.New("no unauthorized"))
 			return
 		}
-		fmt.Println("ORDERS USER_ID", idUser)
+		fmt.Println("ORDERS USER_ID", IDUser)
 
 		if order != nil {
-			if order.IdUser == idUser {
+			if order.IDUser == IDUser {
 				ctx.JSON(200, gin.H{
 					"answer": "номер заказа уже был загружен этим пользователем"})
 			} else {
@@ -75,7 +75,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 
 		newOrder := entities.Order{
 			Number: number,
-			IdUser: idUser,
+			IDUser: IDUser,
 			Status: "NEW",
 		}
 
