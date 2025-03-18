@@ -25,6 +25,5 @@ func MidlewareAuth(ctx *gin.Context) {
 }
 
 func Midleware2(ctx *gin.Context) {
-	print("midleware 2\n")
 	ctx.Next()
 }

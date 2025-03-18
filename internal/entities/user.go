@@ -1,6 +1,10 @@
 package entities
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
 
 type Claims struct {
 	IDUser int `json:"id_user"`
@@ -22,14 +26,25 @@ type UserManagment interface {
 	User(login string) (*User, error)
 }
 
+const (
+	ORDER_NEW        string = "NEW"
+	ORDER_PROCESSING string = "PROCESSING"
+	ORDER_INVALID    string = "INVALID"
+	ORDER_PROCESSED  string = "PROCESSED"
+)
+
 type Order struct {
-	Number string
-	IDUser int
-	Status string
+	Number     string    `json:"number"`
+	Status     string    `json:"status"`
+	Accrual    int       `json:"accrual,omitempty"`
+	IDUser     int       `json:"-"`
+	CreatedAt  time.Time `json:"-"`
+	UploadedAt time.Time `json:"uploaded_at"`
 }
 
 type OrdersManagment interface {
 	Order(number string) (*Order, error)
+	Orders(IDUser int) ([]Order, error)
 	AddOrder(order Order) error
 	UpdateOrder(order Order) error
 }

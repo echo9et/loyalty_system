@@ -4,7 +4,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"fmt"
 
 	"github.com/golang-jwt/jwt/v5"
 	config "gophermart.ru/internal"
@@ -22,6 +21,7 @@ func LoginFromToken(sToken string) (int, error) {
 	tkn, err := jwt.ParseWithClaims(sToken, claims, func(jwtKey *jwt.Token) (any, error) {
 		return []byte(config.Get().SecretKey), nil
 	})
+
 	if err != nil {
 		return -1, err
 	}
@@ -29,6 +29,6 @@ func LoginFromToken(sToken string) (int, error) {
 	if !tkn.Valid {
 		return -1, errors.New("no valid token")
 	}
-	fmt.Println("OK")
+
 	return claims.IDUser, nil
 }

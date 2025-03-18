@@ -60,7 +60,6 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 				errors.New("no unauthorized"))
 			return
 		}
-		fmt.Println("ORDERS USER_ID", IDUser)
 
 		if order != nil {
 			if order.IDUser == IDUser {
@@ -76,7 +75,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 		newOrder := entities.Order{
 			Number: number,
 			IDUser: IDUser,
-			Status: "NEW",
+			Status: entities.ORDER_NEW,
 		}
 
 		err = mngr.AddOrder(newOrder)
@@ -89,5 +88,38 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 		ctx.JSON(200, gin.H{
 			"result": "ok",
 		})
+	})
+
+	group.GET("", func(ctx *gin.Context) {
+		token, err := ctx.Cookie("token")
+		if err != nil {
+			slog.Error(fmt.Sprintf("--- MidlewareAuth token %s", err))
+			ctx.AbortWithError(http.StatusUnauthorized,
+				errors.New("пользователь не авторизован"))
+			return
+		}
+
+		IDUser, err := utils.LoginFromToken(token)
+		if (err != nil) || (IDUser == -1) {
+			ctx.AbortWithError(http.StatusUnauthorized,
+				errors.New("пользователь не авторизован"))
+			return
+		}
+
+		orders, err := mngr.Orders(IDUser)
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("Orders %s", err))
+			ctx.AbortWithError(http.StatusInternalServerError,
+				errors.New("внутренняя ошибка сервера"))
+			return
+		}
+
+		if len(orders) == 0 {
+			ctx.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, orders)
 	})
 }

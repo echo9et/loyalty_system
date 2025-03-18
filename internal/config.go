@@ -32,8 +32,8 @@ func GetAddrDatabase() string {
 func ParseFlags() (*Config, error) {
 	cfg := Get()
 	flag.StringVar(&cfg.AddrServer, "a", "localhost:8080", "server and port to run server")
-	// flag.StringVar(&cfg.AddrDatabase, "d", "", "address to postgres base")
-	flag.StringVar(&cfg.AddrDatabase, "d", "host=localhost user=echo9et password=123321 dbname=echo9et sslmode=disable", "address to postgres base")
+	flag.StringVar(&cfg.AddrDatabase, "d", "", "address to postgres base")
+	// flag.StringVar(&cfg.AddrDatabase, "d", "host=localhost user=echo9et password=123321 dbname=echo9et sslmode=disable", "address to postgres base")
 	flag.StringVar(&cfg.AddrAccraulSystem, "r", "localhost:8000", "adrees accrual system `ip:port`")
 	flag.StringVar(&cfg.SecretKey, "s", "secret_key", "secret key for jwt")
 
