@@ -6,6 +6,7 @@ import (
 
 	// "github.com/echo9et/loyalty_system/cmd/gophermart/app"
 	"gophermart.ru/cmd/gophermart/app"
+	config "gophermart.ru/internal"
 )
 
 func main() {
@@ -14,7 +15,7 @@ func main() {
 		slog.Error(fmt.Sprintln(err))
 		return
 	}
-	err = app.Start("127.0.0.1:8000")
+	err = app.Start(config.Get().AddrServer)
 
 	if err != nil {
 		slog.Error(err.Error())
