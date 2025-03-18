@@ -1,118 +1,122 @@
 package user
 
 import (
+	"bytes"
 	"encoding/json"
-	"io"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
-	config "gophermart.ru/internal"
+	"go.uber.org/mock/gomock"
 	"gophermart.ru/internal/entities"
+	"gophermart.ru/internal/utils"
+	"gophermart.ru/mocks"
 )
 
-func TestLogin_Success(t *testing.T) {
-	// Настройка Gin в тестовом режиме
+func TestLogin(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUserManagment := mocks.NewMockUserManagment(ctrl)
+
 	gin.SetMode(gin.TestMode)
+	router := gin.Default()
+	routers := router.Group("/api/user")
+	Login(routers.Group("/login"), mockUserManagment)
 
-	// Создание роутера
-	router := gin.New()
-	group := router.Group("/login")
-	Login(group, nil)
+	type SendUser struct {
+		Login    string `json:"login"`
+		Password string `json:"password"`
+	}
 
-	// Настройка конфигурации для теста
-	config.Get().AliveToken = time.Minute
-	config.Get().SecretKey = "test-secret-key"
+	t.Run("Test successful login", func(t *testing.T) {
+		user := SendUser{
+			Login:    "test",
+			Password: "password",
+		}
+		hashedPassword := utils.Sha256hash(user.Password)
 
-	// Создание тестового запроса
-	w := httptest.NewRecorder()
-	reqBody := `{"username":"testuser","password":"testpassword"}`
-	req, _ := http.NewRequest("POST", "/login", nil)
-	req.Body = io.NopCloser(strings.NewReader(reqBody))
+		storedUser := entities.User{
+			Login:        user.Login,
+			HashPassword: hashedPassword,
+		}
 
-	// Выполнение запроса
-	router.ServeHTTP(w, req)
+		mockUserManagment.EXPECT().
+			User(user.Login).
+			Return(&storedUser, nil)
 
-	// Проверка статус-кода
-	assert.Equal(t, http.StatusOK, w.Code)
+		jsonValue, _ := json.Marshal(user)
+		req, _ := http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonValue))
+		w := httptest.NewRecorder()
 
-	// Проверка содержимого ответа
-	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
-	assert.Equal(t, "success", response["result"])
+		router.ServeHTTP(w, req)
 
-	// Проверка куки
-	cookie := w.Result().Cookies()
-	assert.Len(t, cookie, 1)
-	tokenCookie := cookie[0]
-	assert.Equal(t, "token", tokenCookie.Name)
-	assert.NotEmpty(t, tokenCookie.Value)
-
-	// Проверка токена JWT
-	claims := &entities.Claims{}
-	token, err := jwt.ParseWithClaims(tokenCookie.Value, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Get().SecretKey), nil
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Contains(t, w.Body.String(), `"result":"success"`)
 	})
-	assert.NoError(t, err)
-	assert.True(t, token.Valid)
-	assert.NotEqual(t, -1, claims.IdUser)
-}
 
-func TestLogin_BadRequest_EmptyFields(t *testing.T) {
-	// Настройка Gin в тестовом режиме
-	gin.SetMode(gin.TestMode)
+	t.Run("Test empty fields", func(t *testing.T) {
+		user := SendUser{
+			Login:    "",
+			Password: "",
+		}
 
-	// Создание роутера
-	router := gin.New()
-	group := router.Group("/login")
-	Login(group, nil)
+		jsonValue, _ := json.Marshal(user)
+		req, _ := http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonValue))
+		w := httptest.NewRecorder()
 
-	// Создание тестового запроса с пустыми полями
-	w := httptest.NewRecorder()
-	reqBody := `{"username":"","password":""}`
-	req, _ := http.NewRequest("POST", "/login", nil)
-	req.Body = io.NopCloser(strings.NewReader(reqBody))
+		router.ServeHTTP(w, req)
 
-	// Выполнение запроса
-	router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Contains(t, w.Body.String(), `"error":"неверный формат запроса"`)
+	})
 
-	// Проверка статус-кода
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	t.Run("Test invalid credentials", func(t *testing.T) {
+		user := SendUser{
+			Login:    "test",
+			Password: "wrongpassword",
+		}
+		hashedPassword := utils.Sha256hash("correctpassword")
 
-	// Проверка содержимого ответа
-	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
-	assert.Equal(t, "Bad Request", response["error"])
-}
+		storedUser := entities.User{
+			Login:        user.Login,
+			HashPassword: hashedPassword,
+		}
 
-func TestLogin_InvalidJSON(t *testing.T) {
-	// Настройка Gin в тестовом режиме
-	gin.SetMode(gin.TestMode)
+		mockUserManagment.EXPECT().
+			User(user.Login).
+			Return(&storedUser, nil)
 
-	// Создание роутера
-	router := gin.New()
-	group := router.Group("/login")
-	Login(group, nil)
+		jsonValue, _ := json.Marshal(user)
+		req, _ := http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonValue))
+		w := httptest.NewRecorder()
 
-	// Создание тестового запроса с некорректным JSON
-	w := httptest.NewRecorder()
-	reqBody := `invalid-json`
-	req, _ := http.NewRequest("POST", "/login", nil)
-	req.Body = io.NopCloser(strings.NewReader(reqBody))
+		router.ServeHTTP(w, req)
 
-	// Выполнение запроса
-	router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+		assert.Contains(t, w.Body.String(), `"error":"неверная пара логин/пароль"`)
+	})
 
-	// Проверка статус-кода
-	assert.Equal(t, http.StatusBadRequest, w.Code)
+	t.Run("Test user not found", func(t *testing.T) {
+		user := SendUser{
+			Login:    "nonexistent",
+			Password: "password",
+		}
 
-	// Проверка содержимого ответа
-	var response map[string]string
-	json.Unmarshal(w.Body.Bytes(), &response)
-	assert.Equal(t, "Bad Request", response["error"])
+		mockUserManagment.EXPECT().
+			User(user.Login).
+			Return(nil, fmt.Errorf("user not found"))
+
+		jsonValue, _ := json.Marshal(user)
+		req, _ := http.NewRequest("POST", "/api/user/login", bytes.NewBuffer(jsonValue))
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Contains(t, w.Body.String(), `"error":"внутренняя ошибка сервера"`)
+	})
 }

@@ -25,7 +25,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 		if user.Login == "" || user.HashPassword == "" {
 			slog.Error("Переданы пустые поля")
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Bad Request",
+				"error": "неверный формат запроса",
 			})
 			return
 		}
@@ -34,14 +34,21 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 		u, err := mngr.User(user.Login)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Bad Request",
+				"error": "внутренняя ошибка сервера",
+			})
+			return
+		}
+
+		if u == nil {
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"error": "неверная пара логин/пароль",
 			})
 			return
 		}
 
 		if !user.IsEcual(u) {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Неверный пароль или логин",
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"error": "неверная пара логин/пароль",
 			})
 			return
 		}
@@ -50,7 +57,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 		if err != nil {
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Status Internal Server",
+				"error": "внутренняя ошибка сервера",
 			})
 			return
 		}

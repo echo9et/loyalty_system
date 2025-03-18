@@ -46,22 +46,32 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 			return
 		}
 
-		fmt.Println(order.Number)
-
 		token, err := ctx.Cookie("token")
 		if err != nil {
 			slog.Error(fmt.Sprintf("--- MidlewareAuth token %s", err))
-			ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
+			ctx.AbortWithError(http.StatusUnauthorized,
+				errors.New("no unauthorized"))
 			return
 		}
 
 		idUser, err := utils.LoginFromToken(token)
 		if (err != nil) || (idUser == -1) {
-			slog.Error(fmt.Sprintf("MidlewareAuth LoginFromToken %s", err))
-			ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
+			ctx.AbortWithError(http.StatusUnauthorized,
+				errors.New("no unauthorized"))
 			return
 		}
 		fmt.Println("ORDERS USER_ID", idUser)
+
+		if order != nil {
+			if order.IdUser == idUser {
+				ctx.JSON(200, gin.H{
+					"answer": "номер заказа уже был загружен этим пользователем"})
+			} else {
+				ctx.AbortWithError(http.StatusConflict,
+					errors.New("номер заказа уже был загружен другим пользователем"))
+			}
+			return
+		}
 
 		newOrder := entities.Order{
 			Number: number,
@@ -71,7 +81,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 
 		err = mngr.AddOrder(newOrder)
 		if err != nil {
-			slog.Error("add order", err.Error())
+			slog.Error(fmt.Sprintf("add order %s", err.Error()))
 			ctx.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}

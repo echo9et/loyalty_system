@@ -22,10 +22,10 @@ func getToken(u *entities.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(config.Get().SecretKey))
 	if err != nil {
-		slog.Error("getToken", err)
+		slog.Error(fmt.Sprintf("getToken %s", err))
 		return "", err
 	}
-	fmt.Println("getToken USER id: %d", claims.IdUser)
+	fmt.Printf("getToken USER id: %d\n", claims.IdUser)
 
 	return tokenString, nil
 }

@@ -17,7 +17,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		if err := ctx.BindJSON(&user); err != nil {
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Bad Request",
+				"error": "неверный формат запроса",
 			})
 			return
 		}
@@ -25,7 +25,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		if user.Login == "" || user.HashPassword == "" {
 			slog.Error("Переданы пустые поля")
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Bad Request",
+				"error": "неверный формат запроса",
 			})
 			return
 		}
@@ -34,7 +34,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		if err := mngr.InsertUser(user); err != nil {
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusConflict, gin.H{
-				"error": "логин занят",
+				"error": "логин уже занят",
 			})
 			return
 		}
@@ -43,7 +43,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		if err != nil {
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Status Internal Server",
+				"error": "внутренняя ошибка сервера",
 			})
 			return
 		}

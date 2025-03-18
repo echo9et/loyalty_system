@@ -84,6 +84,9 @@ func (db *Database) User(login string) (*entities.User, error) {
 		"SELECT id, name, password FROM users WHERE name = $1", login).
 		Scan(&user.Id, &user.Login, &user.HashPassword)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
@@ -96,6 +99,9 @@ func (db *Database) Order(number string) (*entities.Order, error) {
 		"SELECT number, id_user, status FROM orders WHERE number = $1", number).
 		Scan(&order.Number, &order.IdUser, &order.Status)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
 		return nil, err
 	}
 
