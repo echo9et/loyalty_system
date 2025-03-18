@@ -30,6 +30,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 			ctx.JSON(http.StatusBadRequest, gin.H{})
 			return
 		}
+
 		number := string(body)
 		if !isValid(number) {
 			slog.Error("ошибка валидации номера ордера")
@@ -37,28 +38,38 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 			return
 		}
 
+		order, err := mngr.Order(number)
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("ошибка получения ордера %s", err))
+			ctx.JSON(http.StatusBadRequest, gin.H{})
+			return
+		}
+
+		fmt.Println(order.Number)
+
 		token, err := ctx.Cookie("token")
 		if err != nil {
-			slog.Error("--- MidlewareAuth token", err.Error())
+			slog.Error(fmt.Sprintf("--- MidlewareAuth token %s", err))
 			ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
 			return
 		}
 
 		idUser, err := utils.LoginFromToken(token)
 		if (err != nil) || (idUser == -1) {
-			slog.Error("MidlewareAuth LoginFromToken", err)
+			slog.Error(fmt.Sprintf("MidlewareAuth LoginFromToken %s", err))
 			ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
 			return
 		}
 		fmt.Println("ORDERS USER_ID", idUser)
 
-		order := entities.Order{
+		newOrder := entities.Order{
 			Number: number,
 			IdUser: idUser,
 			Status: "NEW",
 		}
 
-		err = mngr.AddOrder(order)
+		err = mngr.AddOrder(newOrder)
 		if err != nil {
 			slog.Error("add order", err.Error())
 			ctx.AbortWithStatus(http.StatusInternalServerError)

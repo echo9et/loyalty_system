@@ -93,7 +93,7 @@ func (db *Database) User(login string) (*entities.User, error) {
 func (db *Database) Order(number string) (*entities.Order, error) {
 	var order entities.Order
 	err := db.conn.QueryRow(
-		"SELECT number, id_user, status users WHERE number = $1", number).
+		"SELECT number, id_user, status FROM orders WHERE number = $1", number).
 		Scan(&order.Number, &order.IdUser, &order.Status)
 	if err != nil {
 		return nil, err
