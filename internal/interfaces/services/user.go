@@ -9,7 +9,7 @@ import (
 func User(group *gin.RouterGroup, db *storage.Database) {
 	user.Login(group.Group("/login"), db)
 	user.Register(group.Group("/register"), db)
-	user.Balance(group.Group("/balance"))
+	user.Balance(group.Group("/balance"), db)
 	user.Orders(group.Group("/orders"), db)
 	user.Withdrawals(group.Group("/withdrawals"))
 }

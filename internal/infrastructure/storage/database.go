@@ -51,11 +51,23 @@ func (db *Database) InitTable() error {
 		`CREATE TABLE IF NOT EXISTS orders (
 		id SERIAL PRIMARY KEY,
 		number VARCHAR(255) NOT NULL UNIQUE,
-		accrual BIGINT DEFAULT 0,
+		accrual DOUBLE PRECISION DEFAULT 0,
 		id_user SERIAL NOT NULL,
 		status VARCHAR(255) NOT NULL,
 		date_created TIMESTAMPTZ DEFAULT NOW(),
 		uploaded_at TIMESTAMPTZ DEFAULT NOW())`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.conn.Exec(
+		`CREATE TABLE IF NOT EXISTS withdraw (
+		id SERIAL PRIMARY KEY,
+		id_user SERIAL NOT NULL,
+		number VARCHAR(255) NOT NULL,
+		amount DOUBLE PRECISION NOT NULL,
+		date_created TIMESTAMPTZ DEFAULT NOW())`)
+
 	if err != nil {
 		return err
 	}
@@ -148,4 +160,80 @@ func (db *Database) UpdateOrder(order entities.Order) error {
 	}
 
 	return nil
+}
+
+func (db *Database) Balance(id_user int) (*entities.Wallet, error) {
+
+	sql_row := db.conn.QueryRow(
+		"SELECT SUM(accrual) FROM orders WHERE id_user = $1 AND status = $2;", id_user, entities.ORDER_PROCESSED)
+
+	if sql_row.Err() != nil {
+		if sql_row.Err() != sql.ErrNoRows {
+			return &entities.Wallet{ID: id_user}, nil
+		}
+		return nil, sql_row.Err()
+	}
+
+	var balance float64
+	sql_row.Scan(&balance)
+
+	withdraw, err := db.SumWithdraw(id_user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &entities.Wallet{
+		ID:       id_user,
+		Balance:  float64(balance),
+		Withdraw: withdraw,
+	}, nil
+}
+
+func (db *Database) Withdraw(w entities.Withdraw) error {
+
+	order, err := db.Order(w.Order)
+	if err != nil {
+		return err
+	}
+
+	if order == nil || w.ID != order.IDUser {
+		return entities.ErrIncorrectOrder
+	}
+
+	wallet, err := db.Balance(w.ID)
+
+	if err != nil {
+		return err
+	}
+
+	if wallet.Balance-w.Sum < 0 {
+		return entities.ErrNoMoney
+	}
+
+	_, err = db.conn.Exec(
+		"INSERT INTO withdraw (id_user, number, amount) VALUES ($1, $2, $3)", w.ID, w.Order, w.Sum)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (db *Database) SumWithdraw(id int) (float64, error) {
+
+	sql_row := db.conn.QueryRow(
+		"SELECT SUM(amount) FROM withdraw WHERE id_user = $1;", id)
+
+	if sql_row.Err() != nil {
+		if sql_row.Err() != sql.ErrNoRows {
+			return 0, nil
+		}
+		return 0, sql_row.Err()
+	}
+
+	var withdraw float64
+	sql_row.Scan(&withdraw)
+
+	return withdraw, nil
 }

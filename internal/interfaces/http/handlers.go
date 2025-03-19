@@ -2,10 +2,12 @@ package interfaces
 
 import (
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"gophermart.ru/internal/utils"
 )
 
 func MidlewareAuth(ctx *gin.Context) {
@@ -14,13 +16,22 @@ func MidlewareAuth(ctx *gin.Context) {
 		return
 	}
 
-	_, err := ctx.Cookie("token")
+	token, err := ctx.Cookie("token")
 	if err != nil {
-		slog.Error(err.Error())
+		slog.Error(fmt.Sprintf("MidlewareAuth: %s", err.Error()))
 		ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
 		return
 	}
 
+	IDUser, err := utils.LoginFromToken(token)
+
+	if err != nil {
+		slog.Error(err.Error())
+		ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
+	}
+
+	ctx.Set("id_user", IDUser)
+	fmt.Println("id_user", IDUser)
 	ctx.Next()
 }
 

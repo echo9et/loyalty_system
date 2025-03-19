@@ -122,6 +122,21 @@ func (mr *MockOrdersManagmentMockRecorder) Order(number any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Order", reflect.TypeOf((*MockOrdersManagment)(nil).Order), number)
 }
 
+// Orders mocks base method.
+func (m *MockOrdersManagment) Orders(IDUser int) ([]entities.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Orders", IDUser)
+	ret0, _ := ret[0].([]entities.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Orders indicates an expected call of Orders.
+func (mr *MockOrdersManagmentMockRecorder) Orders(IDUser any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Orders", reflect.TypeOf((*MockOrdersManagment)(nil).Orders), IDUser)
+}
+
 // UpdateOrder mocks base method.
 func (m *MockOrdersManagment) UpdateOrder(order entities.Order) error {
 	m.ctrl.T.Helper()
@@ -134,4 +149,72 @@ func (m *MockOrdersManagment) UpdateOrder(order entities.Order) error {
 func (mr *MockOrdersManagmentMockRecorder) UpdateOrder(order any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrder", reflect.TypeOf((*MockOrdersManagment)(nil).UpdateOrder), order)
+}
+
+// MockWalletManagment is a mock of WalletManagment interface.
+type MockWalletManagment struct {
+	ctrl     *gomock.Controller
+	recorder *MockWalletManagmentMockRecorder
+	isgomock struct{}
+}
+
+// MockWalletManagmentMockRecorder is the mock recorder for MockWalletManagment.
+type MockWalletManagmentMockRecorder struct {
+	mock *MockWalletManagment
+}
+
+// NewMockWalletManagment creates a new mock instance.
+func NewMockWalletManagment(ctrl *gomock.Controller) *MockWalletManagment {
+	mock := &MockWalletManagment{ctrl: ctrl}
+	mock.recorder = &MockWalletManagmentMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockWalletManagment) EXPECT() *MockWalletManagmentMockRecorder {
+	return m.recorder
+}
+
+// Balance mocks base method.
+func (m *MockWalletManagment) Balance(id_user int) (*entities.Wallet, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Balance", id_user)
+	ret0, _ := ret[0].(*entities.Wallet)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Balance indicates an expected call of Balance.
+func (mr *MockWalletManagmentMockRecorder) Balance(id_user any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Balance", reflect.TypeOf((*MockWalletManagment)(nil).Balance), id_user)
+}
+
+// SumWithdraw mocks base method.
+func (m *MockWalletManagment) SumWithdraw(user_id int) (float64, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SumWithdraw", user_id)
+	ret0, _ := ret[0].(float64)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SumWithdraw indicates an expected call of SumWithdraw.
+func (mr *MockWalletManagmentMockRecorder) SumWithdraw(user_id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SumWithdraw", reflect.TypeOf((*MockWalletManagment)(nil).SumWithdraw), user_id)
+}
+
+// Withdraw mocks base method.
+func (m *MockWalletManagment) Withdraw(w entities.Withdraw) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Withdraw", w)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Withdraw indicates an expected call of Withdraw.
+func (mr *MockWalletManagmentMockRecorder) Withdraw(w any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Withdraw", reflect.TypeOf((*MockWalletManagment)(nil).Withdraw), w)
 }

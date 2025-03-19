@@ -1,6 +1,7 @@
 package user
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -39,7 +40,16 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 			return
 		}
 
-		token, err := getToken(&user)
+		u, err := mngr.User(user.Login)
+
+		if err != nil || u == nil {
+			slog.Error(err.Error())
+			ctx.AbortWithError(http.StatusInternalServerError,
+				errors.New("внутренняя ошибка сервера"))
+			return
+		}
+
+		token, err := getToken(u)
 		if err != nil {
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -51,7 +61,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		ctx.SetCookie("token", token, int(config.Get().AliveToken), "", "", false, true)
 
 		ctx.JSON(200, gin.H{
-			"result": "ok",
+			"status": "ok",
 		})
 	})
 }

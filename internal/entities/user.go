@@ -1,9 +1,15 @@
 package entities
 
 import (
+	"errors"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+)
+
+var (
+	ErrNoMoney        = errors.New("на счету недостаточно средств")
+	ErrIncorrectOrder = errors.New("неверный номер заказа")
 )
 
 type Claims struct {
@@ -47,4 +53,27 @@ type OrdersManagment interface {
 	Orders(IDUser int) ([]Order, error)
 	AddOrder(order Order) error
 	UpdateOrder(order Order) error
+}
+
+type Wallet struct {
+	ID       int     `json:"-"`
+	Balance  float64 `json:"current"`
+	Withdraw float64 `json:"withdrawn"`
+}
+
+type Withdraw struct {
+	ID    int     `json:"-"`
+	Order string  `json:"order"`
+	Sum   float64 `json:"sum"`
+}
+
+type WithdrawOrder struct {
+	Order string  `json:"order"`
+	Sum   float64 `json:"sum"`
+}
+
+type WalletManagment interface {
+	Balance(id_user int) (*Wallet, error)
+	Withdraw(w Withdraw) error
+	SumWithdraw(user_id int) (float64, error)
 }
