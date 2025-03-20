@@ -62,18 +62,15 @@ type Wallet struct {
 }
 
 type Withdraw struct {
-	ID    int     `json:"-"`
-	Order string  `json:"order"`
-	Sum   float64 `json:"sum"`
-}
-
-type WithdrawOrder struct {
-	Order string  `json:"order"`
-	Sum   float64 `json:"sum"`
+	ID        int       `json:"-"`
+	Order     string    `json:"order"`
+	Sum       float64   `json:"sum"`
+	CreatedAt time.Time `json:"processed_at,omitempty"`
 }
 
 type WalletManagment interface {
-	Balance(id_user int) (*Wallet, error)
+	Balance(IDUser int) (*Wallet, error)
 	Withdraw(w Withdraw) error
-	SumWithdraw(user_id int) (float64, error)
+	SumWithdraw(IDUser int) (float64, error)
+	Withdraws(IDUser int) ([]Withdraw, error)
 }

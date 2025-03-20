@@ -27,8 +27,7 @@ func Balance(group *gin.RouterGroup, mngr entities.WalletManagment) {
 	group.POST("/withdraw", func(ctx *gin.Context) {
 		IDUser := ctx.Value("id_user").(int)
 		withdraw := entities.Withdraw{ID: IDUser}
-		test := entities.WithdrawOrder{}
-		if err := ctx.BindJSON(&test); err != nil {
+		if err := ctx.BindJSON(&withdraw); err != nil {
 			slog.Error(fmt.Sprintf("POST Balance %s", err.Error()))
 			ctx.AbortWithStatus(http.StatusBadRequest)
 		}

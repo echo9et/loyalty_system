@@ -220,10 +220,16 @@ func (db *Database) Withdraw(w entities.Withdraw) error {
 	return nil
 }
 
-func (db *Database) SumWithdraw(id int) (float64, error) {
+func (db *Database) Withdraws(IDUser int) ([]entities.Withdraw, error) {
+	var withdraws []entities.Withdraw
+
+	return withdraws, nil
+}
+
+func (db *Database) SumWithdraw(IDUser int) (float64, error) {
 
 	sql_row := db.conn.QueryRow(
-		"SELECT SUM(amount) FROM withdraw WHERE id_user = $1;", id)
+		"SELECT SUM(amount) FROM withdraw WHERE id_user = $1;", IDUser)
 
 	if sql_row.Err() != nil {
 		if sql_row.Err() != sql.ErrNoRows {

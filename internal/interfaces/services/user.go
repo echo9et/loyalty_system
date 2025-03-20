@@ -11,5 +11,5 @@ func User(group *gin.RouterGroup, db *storage.Database) {
 	user.Register(group.Group("/register"), db)
 	user.Balance(group.Group("/balance"), db)
 	user.Orders(group.Group("/orders"), db)
-	user.Withdrawals(group.Group("/withdrawals"))
+	user.Withdrawals(group.Group("/withdrawals"), db)
 }

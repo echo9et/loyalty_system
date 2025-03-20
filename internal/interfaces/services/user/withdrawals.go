@@ -1,11 +1,31 @@
 package user
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"log/slog"
+	"net/http"
 
-func Withdrawals(group *gin.RouterGroup) {
+	"github.com/gin-gonic/gin"
+	"gophermart.ru/internal/entities"
+)
+
+func Withdrawals(group *gin.RouterGroup, mngr entities.WalletManagment) {
 	group.GET("", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{
-			"result": "ok /Withdrawals",
-		})
+		IDUser := ctx.Value("id_user").(int)
+
+		withdraws, err := mngr.Withdraws(IDUser)
+
+		if err != nil {
+			slog.Error(fmt.Sprintf("GET Withdrawals %s", err.Error()))
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		if len(withdraws) == 0 {
+			ctx.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		ctx.JSON(200, withdraws)
 	})
 }
