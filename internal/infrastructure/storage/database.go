@@ -115,11 +115,11 @@ func (db *Database) Order(number string) (*entities.Order, error) {
 	return &order, nil
 }
 
-func (db *Database) Orders(IDUser int) ([]entities.Order, error) {
+func (db *Database) Orders(idUser int) ([]entities.Order, error) {
 	var orders []entities.Order
 
 	rows, err := db.conn.Query(
-		"SELECT number, status, accrual, id_user, date_created, uploaded_at FROM orders WHERE id_user = $1 ORDER BY uploaded_at DESC", IDUser)
+		"SELECT number, status, accrual, id_user, date_created, uploaded_at FROM orders WHERE id_user = $1 ORDER BY uploaded_at DESC", idUser)
 	if err != nil {
 		return nil, err
 	}
@@ -162,28 +162,28 @@ func (db *Database) UpdateOrder(order entities.Order) error {
 	return nil
 }
 
-func (db *Database) Balance(id_user int) (*entities.Wallet, error) {
+func (db *Database) Balance(idUser int) (*entities.Wallet, error) {
 
-	sql_row := db.conn.QueryRow(
-		"SELECT SUM(accrual) FROM orders WHERE id_user = $1 AND status = $2;", id_user, entities.ORDER_PROCESSED)
+	sqlRow := db.conn.QueryRow(
+		"SELECT SUM(accrual) FROM orders WHERE id_user = $1 AND status = $2;", idUser, entities.OrderProcessed)
 
-	if sql_row.Err() != nil {
-		if sql_row.Err() != sql.ErrNoRows {
-			return &entities.Wallet{ID: id_user}, nil
+	if sqlRow.Err() != nil {
+		if sqlRow.Err() != sql.ErrNoRows {
+			return &entities.Wallet{ID: idUser}, nil
 		}
-		return nil, sql_row.Err()
+		return nil, sqlRow.Err()
 	}
 
 	var balance float64
-	sql_row.Scan(&balance)
+	sqlRow.Scan(&balance)
 
-	withdraw, err := db.SumWithdraw(id_user)
+	withdraw, err := db.SumWithdraw(idUser)
 	if err != nil {
 		return nil, err
 	}
 
 	return &entities.Wallet{
-		ID:       id_user,
+		ID:       idUser,
 		Balance:  float64(balance),
 		Withdraw: withdraw,
 	}, nil
@@ -220,26 +220,45 @@ func (db *Database) Withdraw(w entities.Withdraw) error {
 	return nil
 }
 
-func (db *Database) Withdraws(IDUser int) ([]entities.Withdraw, error) {
+func (db *Database) Withdraws(idUser int) ([]entities.Withdraw, error) {
 	var withdraws []entities.Withdraw
+
+	rows, err := db.conn.Query(
+		"SELECT number, amount, id_user, date_created FROM orders WHERE id_user = $1 ORDER BY uploaded_at DESC", idUser)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var withdraw entities.Withdraw
+		if err := rows.Scan(&withdraw.Order, &withdraw.Sum, &withdraw.CreatedAt); err != nil {
+			return nil, err
+		}
+		withdraws = append(withdraws, withdraw)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 
 	return withdraws, nil
 }
 
-func (db *Database) SumWithdraw(IDUser int) (float64, error) {
+func (db *Database) SumWithdraw(idUser int) (float64, error) {
 
-	sql_row := db.conn.QueryRow(
-		"SELECT SUM(amount) FROM withdraw WHERE id_user = $1;", IDUser)
+	sqlRow := db.conn.QueryRow(
+		"SELECT SUM(amount) FROM withdraw WHERE id_user = $1;", idUser)
 
-	if sql_row.Err() != nil {
-		if sql_row.Err() != sql.ErrNoRows {
+	if sqlRow.Err() != nil {
+		if sqlRow.Err() != sql.ErrNoRows {
 			return 0, nil
 		}
-		return 0, sql_row.Err()
+		return 0, sqlRow.Err()
 	}
 
 	var withdraw float64
-	sql_row.Scan(&withdraw)
+	sqlRow.Scan(&withdraw)
 
 	return withdraw, nil
 }

@@ -33,10 +33,10 @@ type UserManagment interface {
 }
 
 const (
-	ORDER_NEW        string = "NEW"
-	ORDER_PROCESSING string = "PROCESSING"
-	ORDER_INVALID    string = "INVALID"
-	ORDER_PROCESSED  string = "PROCESSED"
+	OrderNew        string = "NEW"
+	OrderProcessing string = "PROCESSING"
+	OrderInvalid    string = "INVALID"
+	OrderProcessed  string = "PROCESSED"
 )
 
 type Order struct {

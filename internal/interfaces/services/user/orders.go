@@ -75,7 +75,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 		newOrder := entities.Order{
 			Number: number,
 			IDUser: IDUser,
-			Status: entities.ORDER_NEW,
+			Status: entities.OrderNew,
 		}
 
 		err = mngr.AddOrder(newOrder)
