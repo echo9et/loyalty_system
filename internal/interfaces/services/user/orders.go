@@ -116,10 +116,10 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 		}
 
 		if len(orders) == 0 {
-			ctx.AbortWithStatus(http.StatusNoContent)
+			ctx.AbortWithStatus(http.StatusOK)
 			return
 		}
 
-		ctx.JSON(http.StatusOK, orders)
+		ctx.JSON(http.StatusAccepted, orders)
 	})
 }
