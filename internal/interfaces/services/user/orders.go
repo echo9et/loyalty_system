@@ -66,7 +66,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 				ctx.JSON(200, gin.H{
 					"answer": "номер заказа уже был загружен этим пользователем"})
 			} else {
-				ctx.AbortWithError(http.StatusConflict,
+				ctx.AbortWithError(http.StatusOK,
 					errors.New("номер заказа уже был загружен другим пользователем"))
 			}
 			return
@@ -85,7 +85,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 			return
 		}
 
-		ctx.JSON(200, gin.H{
+		ctx.JSON(http.StatusAccepted, gin.H{
 			"result": "ok",
 		})
 	})
@@ -116,10 +116,10 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 		}
 
 		if len(orders) == 0 {
-			ctx.AbortWithStatus(http.StatusOK)
+			ctx.AbortWithStatus(http.StatusNoContent)
 			return
 		}
 
-		ctx.JSON(http.StatusAccepted, orders)
+		ctx.JSON(http.StatusOK, orders)
 	})
 }
