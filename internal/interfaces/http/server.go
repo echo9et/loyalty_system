@@ -48,8 +48,8 @@ func New() (*Server, error) {
 		ctx.Header("Content-Type", "application/json")
 		ctx.Next()
 	})
+
 	server.Engine.Use(MidlewareAuth)
-	server.Engine.Use(Midleware2)
 
 	services.User(server.Engine.Group("api/user"), server.db)
 

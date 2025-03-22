@@ -18,7 +18,7 @@ func MidlewareAuth(ctx *gin.Context) {
 
 	token, err := ctx.Cookie("token")
 	if err != nil {
-		slog.Error(fmt.Sprintf("MidlewareAuth: %s", err.Error()))
+		slog.Error(fmt.Sprintf("MidlewareAuth not found token: %s, url:%s", err.Error(), ctx.Request.URL.Path))
 		ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
 		return
 	}
@@ -32,9 +32,5 @@ func MidlewareAuth(ctx *gin.Context) {
 
 	ctx.Set("id_user", IDUser)
 	fmt.Println("id_user", IDUser)
-	ctx.Next()
-}
-
-func Midleware2(ctx *gin.Context) {
 	ctx.Next()
 }
