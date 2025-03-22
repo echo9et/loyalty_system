@@ -49,6 +49,7 @@ func New() (*Server, error) {
 		ctx.Next()
 	})
 
+	server.Engine.Use(MidlewareErrors)
 	server.Engine.Use(MidlewareAuth)
 
 	services.User(server.Engine.Group("api/user"), server.db)

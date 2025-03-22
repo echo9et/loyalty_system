@@ -59,9 +59,6 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		}
 
 		ctx.SetCookie("token", token, int(config.Get().AliveToken), "", "", false, true)
-
-		ctx.JSON(200, gin.H{
-			"status": "ok",
-		})
+		ctx.JSON(200, gin.H{"status": "ok"})
 	})
 }

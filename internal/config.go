@@ -21,7 +21,7 @@ func Get() *Config {
 	if config == nil {
 		config = &Config{}
 	}
-	config.AliveToken = time.Hour * 24
+	config.AliveToken = time.Hour * 3
 	return config
 }
 

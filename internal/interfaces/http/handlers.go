@@ -34,3 +34,19 @@ func MidlewareAuth(ctx *gin.Context) {
 	fmt.Println("id_user", IDUser)
 	ctx.Next()
 }
+
+func MidlewareErrors(ctx *gin.Context) {
+	ctx.Next()
+
+	if len(ctx.Errors) > 0 {
+		fmt.Println(ctx.Errors[0].Err.Error())
+		err := ctx.Errors[0]
+		code := ctx.Writer.Status()
+
+		if code == http.StatusInternalServerError {
+			slog.Error(err.Err.Error())
+		} else {
+			slog.Warn(err.Err.Error())
+		}
+	}
+}
