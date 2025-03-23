@@ -6,6 +6,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"unicode"
 
 	"github.com/gin-gonic/gin"
@@ -14,15 +15,29 @@ import (
 )
 
 func isValid(number string) bool {
-	if len(number) < 5 {
-		return false
-	}
 	for _, char := range number {
 		if !unicode.IsDigit(char) {
 			return false
 		}
 	}
-	return true
+	return isValidLuhn(number)
+}
+
+func isValidLuhn(number string) bool {
+	sum := 0
+	isEven := false
+	for i := len(number) - 1; i >= 0; i-- {
+		digit, _ := strconv.Atoi(string(number[i]))
+		if isEven {
+			digit *= 2
+			if digit > 9 {
+				digit -= 9
+			}
+		}
+		sum += digit
+		isEven = !isEven
+	}
+	return sum%10 == 0
 }
 
 func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment, a *AccrualSystem) {
