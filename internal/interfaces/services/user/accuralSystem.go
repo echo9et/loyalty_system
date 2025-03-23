@@ -25,7 +25,7 @@ func (a *AccrualSystem) Do(req *http.Request) (*http.Response, error) {
 }
 
 func (a *AccrualSystem) GetOrderInfo(orderNumber string) (*OrderResponse, int, error) {
-	url := fmt.Sprintf("http://%s/api/orders/%s", a.addr, orderNumber)
+	url := fmt.Sprintf("%s/api/orders/%s", a.addr, orderNumber)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, 0, err
