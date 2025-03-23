@@ -16,6 +16,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		var user entities.User
 
 		if err := ctx.BindJSON(&user); err != nil {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "неверный формат запроса",
@@ -24,6 +25,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		}
 
 		if user.Login == "" || user.HashPassword == "" {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			slog.Error("Переданы пустые поля")
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "неверный формат запроса",
@@ -33,6 +35,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		user.HashPassword = utils.Sha256hash(user.HashPassword)
 
 		if err := mngr.InsertUser(user); err != nil {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusConflict, gin.H{
 				"error": "логин уже занят",
@@ -43,6 +46,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		u, err := mngr.User(user.Login)
 
 		if err != nil || u == nil {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			slog.Error(err.Error())
 			ctx.AbortWithError(http.StatusInternalServerError,
 				errors.New("внутренняя ошибка сервера"))
@@ -51,6 +55,7 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 
 		token, err := getToken(u)
 		if err != nil {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": "внутренняя ошибка сервера",

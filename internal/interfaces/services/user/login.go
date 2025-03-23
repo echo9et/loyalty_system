@@ -16,6 +16,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 
 		if err := ctx.BindJSON(&user); err != nil {
 			slog.Error(err.Error())
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "Bad Request",
 			})
@@ -23,6 +24,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 		}
 
 		if user.Login == "" || user.HashPassword == "" {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			slog.Error("Переданы пустые поля")
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "неверный формат запроса",
@@ -33,6 +35,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 
 		u, err := mngr.User(user.Login)
 		if err != nil {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": "внутренняя ошибка сервера",
 			})
@@ -40,6 +43,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 		}
 
 		if u == nil {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			ctx.JSON(http.StatusUnauthorized, gin.H{
 				"error": "неверная пара логин/пароль",
 			})
@@ -47,6 +51,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 		}
 
 		if !user.IsEcual(u) {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			ctx.JSON(http.StatusUnauthorized, gin.H{
 				"error": "неверная пара логин/пароль",
 			})
@@ -55,6 +60,7 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 
 		token, err := getToken(u)
 		if err != nil {
+			ctx.SetCookie("token", "", 0, "/", "", false, true)
 			slog.Error(err.Error())
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": "внутренняя ошибка сервера",
