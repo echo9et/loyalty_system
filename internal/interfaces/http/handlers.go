@@ -1,6 +1,7 @@
 package interfaces
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -38,10 +39,11 @@ func MidlewareErrors(ctx *gin.Context) {
 		err := ctx.Errors[0]
 		code := ctx.Writer.Status()
 
+		msg := fmt.Sprintf("status code: %d, %s", code, err.Err.Error())
 		if code == http.StatusInternalServerError {
-			slog.Error(err.Err.Error())
+			slog.Error(msg)
 		} else {
-			slog.Warn(err.Err.Error())
+			slog.Warn(msg)
 		}
 	}
 }
