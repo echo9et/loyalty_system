@@ -25,7 +25,6 @@ func getToken(u *entities.User) (string, error) {
 		slog.Error(fmt.Sprintf("getToken %s", err))
 		return "", err
 	}
-	fmt.Printf("getToken USER id: %d\n", claims.IDUser)
 
 	return tokenString, nil
 }

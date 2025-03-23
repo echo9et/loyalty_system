@@ -38,7 +38,6 @@ func MidlewareErrors(ctx *gin.Context) {
 	ctx.Next()
 
 	if len(ctx.Errors) > 0 {
-		fmt.Println(ctx.Errors[0].Err.Error())
 		err := ctx.Errors[0]
 		code := ctx.Writer.Status()
 

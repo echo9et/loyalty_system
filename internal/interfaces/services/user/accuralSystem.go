@@ -55,7 +55,3 @@ func NewAccrualSystem() *AccrualSystem {
 		client: &http.Client{Timeout: 10 * time.Second},
 	}
 }
-
-func (as *AccrualSystem) CheckOrder(orderID string) error {
-	return nil
-}
