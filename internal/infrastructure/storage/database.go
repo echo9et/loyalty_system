@@ -191,14 +191,14 @@ func (db *Database) Balance(idUser int) (*entities.Wallet, error) {
 
 func (db *Database) Withdraw(w entities.Withdraw) error {
 
-	order, err := db.Order(w.Order)
-	if err != nil {
-		return err
-	}
+	// order, err := db.Order(w.Order)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if order == nil || w.ID != order.IDUser {
-		return entities.ErrIncorrectOrder
-	}
+	// if order == nil || w.ID != order.IDUser {
+	// 	return entities.ErrIncorrectOrder
+	// }
 
 	wallet, err := db.Balance(w.ID)
 
