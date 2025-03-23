@@ -31,7 +31,6 @@ func MidlewareAuth(ctx *gin.Context) {
 	}
 
 	ctx.Set("id_user", IDUser)
-	fmt.Println("id_user", IDUser)
 	ctx.Next()
 }
 
