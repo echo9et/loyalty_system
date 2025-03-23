@@ -6,39 +6,11 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"strconv"
-	"unicode"
 
 	"github.com/gin-gonic/gin"
 	"gophermart.ru/internal/entities"
 	"gophermart.ru/internal/utils"
 )
-
-func isValid(number string) bool {
-	for _, char := range number {
-		if !unicode.IsDigit(char) {
-			return false
-		}
-	}
-	return isValidLuhn(number)
-}
-
-func isValidLuhn(number string) bool {
-	sum := 0
-	isEven := false
-	for i := len(number) - 1; i >= 0; i-- {
-		digit, _ := strconv.Atoi(string(number[i]))
-		if isEven {
-			digit *= 2
-			if digit > 9 {
-				digit -= 9
-			}
-		}
-		sum += digit
-		isEven = !isEven
-	}
-	return sum%10 == 0
-}
 
 func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment, a *AccrualSystem) {
 	group.POST("", func(ctx *gin.Context) {
@@ -50,9 +22,9 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment, a *AccrualSys
 		}
 
 		number := string(body)
-		if !isValid(number) {
+		if !utils.IsValidOrder(number) {
 			slog.Error("ошибка валидации номера ордера")
-			ctx.JSON(http.StatusBadRequest, gin.H{})
+			ctx.JSON(http.StatusUnprocessableEntity, gin.H{})
 			return
 		}
 

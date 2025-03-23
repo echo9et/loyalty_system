@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"strconv"
+	"unicode"
 
 	"github.com/golang-jwt/jwt/v5"
 	config "gophermart.ru/internal"
@@ -31,4 +33,30 @@ func LoginFromToken(sToken string) (int, error) {
 	}
 
 	return claims.IDUser, nil
+}
+
+func IsValidOrder(number string) bool {
+	for _, char := range number {
+		if !unicode.IsDigit(char) {
+			return false
+		}
+	}
+	return isValidLuhn(number)
+}
+
+func isValidLuhn(number string) bool {
+	sum := 0
+	isEven := false
+	for i := len(number) - 1; i >= 0; i-- {
+		digit, _ := strconv.Atoi(string(number[i]))
+		if isEven {
+			digit *= 2
+			if digit > 9 {
+				digit -= 9
+			}
+		}
+		sum += digit
+		isEven = !isEven
+	}
+	return sum%10 == 0
 }
