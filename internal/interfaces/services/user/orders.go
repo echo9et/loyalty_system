@@ -151,7 +151,7 @@ func UpdateOrder(order *entities.Order, mngr entities.OrdersManagment, a *Accrua
 	}
 
 	order.Status = newOrder.Status
-	order.Accrual = int(newOrder.Accrual)
+	order.Accrual = newOrder.Accrual
 	err = mngr.UpdateOrder(*order)
 
 	if err != nil {
