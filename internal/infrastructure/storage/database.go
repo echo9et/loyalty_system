@@ -214,7 +214,7 @@ func (db *Database) Withdraw(w entities.Withdraw) error {
 func (db *Database) Withdraws(idUser int) ([]entities.Withdraw, error) {
 	var withdraws []entities.Withdraw
 	rows, err := db.conn.Query(
-		"SELECT id_user, number, amount, date_created FROM withdraw WHERE id_user = $1 ORDER BY uploaded_at DESC", idUser)
+		"SELECT id_user, number, amount, date_created FROM withdraw WHERE id_user = $1 ORDER BY date_created DESC", idUser)
 	if err != nil {
 		return nil, err
 	}
