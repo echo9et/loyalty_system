@@ -53,10 +53,10 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment, a *AccrualSys
 
 		if order != nil {
 			if order.IDUser == IDUser {
-				ctx.JSON(http.StatusConflict, gin.H{
+				ctx.JSON(http.StatusOK, gin.H{
 					"answer": "номер заказа уже был загружен этим пользователем"})
 			} else {
-				ctx.AbortWithError(http.StatusOK,
+				ctx.AbortWithError(http.StatusConflict,
 					errors.New("номер заказа уже был загружен другим пользователем"))
 			}
 			return
