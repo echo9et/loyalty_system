@@ -31,7 +31,7 @@ func Balance(group *gin.RouterGroup, mngr entities.WalletManagment) {
 			slog.Error(fmt.Sprintf("POST Balance %s", err.Error()))
 			ctx.AbortWithStatus(http.StatusBadRequest)
 		}
-
+		slog.Info("balane/withdraw", withdraw.ID, withdraw.Order, withdraw.Sum)
 		err := mngr.Withdraw(withdraw)
 
 		if err != nil {
