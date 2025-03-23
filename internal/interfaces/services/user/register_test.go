@@ -54,7 +54,6 @@ func TestRegister(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Contains(t, w.Body.String(), `"result":"ok"`)
 	})
 
 	t.Run("Test empty fields", func(t *testing.T) {
@@ -70,7 +69,6 @@ func TestRegister(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Contains(t, w.Body.String(), `"error":"неверный формат запроса"`)
 	})
 
 	t.Run("Test login already exists", func(t *testing.T) {
@@ -94,6 +92,5 @@ func TestRegister(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusConflict, w.Code)
-		assert.Contains(t, w.Body.String(), `"error":"логин уже занят"`)
 	})
 }

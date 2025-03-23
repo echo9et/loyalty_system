@@ -36,20 +36,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment, a *AccrualSys
 			return
 		}
 
-		token, err := ctx.Cookie("token")
-		if err != nil {
-			slog.Error(fmt.Sprintf("--- MidlewareAuth token %s", err))
-			ctx.AbortWithError(http.StatusUnauthorized,
-				errors.New("no unauthorized"))
-			return
-		}
-
-		IDUser, err := utils.LoginFromToken(token)
-		if (err != nil) || (IDUser == -1) {
-			ctx.AbortWithError(http.StatusUnauthorized,
-				errors.New("no unauthorized"))
-			return
-		}
+		IDUser := ctx.Value("id_user").(int)
 
 		if order != nil {
 			if order.IDUser == IDUser {
@@ -83,20 +70,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment, a *AccrualSys
 	})
 
 	group.GET("", func(ctx *gin.Context) {
-		token, err := ctx.Cookie("token")
-		if err != nil {
-			slog.Error(fmt.Sprintf("MidlewareAuth token %s", err))
-			ctx.AbortWithError(http.StatusUnauthorized,
-				errors.New("пользователь не авторизован"))
-			return
-		}
-
-		IDUser, err := utils.LoginFromToken(token)
-		if (err != nil) || (IDUser == -1) {
-			ctx.AbortWithError(http.StatusUnauthorized,
-				errors.New("пользователь не авторизован"))
-			return
-		}
+		IDUser := ctx.Value("id_user").(int)
 
 		orders, err := mngr.Orders(IDUser)
 

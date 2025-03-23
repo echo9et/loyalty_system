@@ -1,7 +1,7 @@
 package user
 
 import (
-	"log/slog"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,54 +15,42 @@ func Login(group *gin.RouterGroup, mngr entities.UserManagment) {
 		var user entities.User
 
 		if err := ctx.BindJSON(&user); err != nil {
-			slog.Error(err.Error())
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Bad Request",
-			})
+			ctx.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
 
 		if user.Login == "" || user.HashPassword == "" {
-			slog.Error("Переданы пустые поля")
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "неверный формат запроса",
-			})
+			ctx.AbortWithError(http.StatusBadRequest,
+				errors.New("неверный формат запроса"))
 			return
 		}
 		user.HashPassword = utils.Sha256hash(user.HashPassword)
 
 		u, err := mngr.User(user.Login)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "внутренняя ошибка сервера",
-			})
+			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 
 		if u == nil {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "неверная пара логин/пароль",
-			})
+			ctx.AbortWithError(http.StatusUnauthorized,
+				errors.New("неверная пара логин/пароль"))
 			return
 		}
 
 		if !user.IsEcual(u) {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "неверная пара логин/пароль",
-			})
+			ctx.AbortWithError(http.StatusUnauthorized,
+				errors.New("неверная пара логин/пароль"))
 			return
 		}
 
 		token, err := getToken(u)
 		if err != nil {
-			slog.Error(err.Error())
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "внутренняя ошибка сервера",
-			})
+			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 		ctx.SetCookie("token", token, int(config.Get().AliveToken), "/", "", false, true)
-		ctx.JSON(200, gin.H{
+		ctx.JSON(http.StatusOK, gin.H{
 			"status": "ok",
 		})
 	})

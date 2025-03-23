@@ -1,8 +1,6 @@
 package user
 
 import (
-	"fmt"
-	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -16,8 +14,7 @@ func Balance(group *gin.RouterGroup, mngr entities.WalletManagment) {
 
 		wallet, err := mngr.Balance(IDUser)
 		if err != nil {
-			slog.Error(fmt.Sprintf("GET Balance %s", err.Error()))
-			ctx.AbortWithStatus(http.StatusInternalServerError)
+			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 
@@ -28,19 +25,18 @@ func Balance(group *gin.RouterGroup, mngr entities.WalletManagment) {
 		IDUser := ctx.Value("id_user").(int)
 		withdraw := entities.Withdraw{ID: IDUser}
 		if err := ctx.BindJSON(&withdraw); err != nil {
-			slog.Error(fmt.Sprintf("POST Balance %s", err.Error()))
-			ctx.AbortWithStatus(http.StatusBadRequest)
+			ctx.AbortWithError(http.StatusBadRequest, err)
+			return
 		}
 		err := mngr.Withdraw(withdraw)
 
 		if err != nil {
-			slog.Error(fmt.Sprintf("POST Balance %s", err.Error()))
 			if err == entities.ErrNoMoney {
-				ctx.AbortWithStatus(http.StatusPaymentRequired)
+				ctx.AbortWithError(http.StatusPaymentRequired, err)
 			} else if err == entities.ErrIncorrectOrder {
-				ctx.AbortWithStatus(http.StatusUnprocessableEntity)
+				ctx.AbortWithError(http.StatusUnprocessableEntity, err)
 			} else {
-				ctx.AbortWithStatus(http.StatusInternalServerError)
+				ctx.AbortWithError(http.StatusInternalServerError, err)
 			}
 			return
 		}

@@ -1,7 +1,6 @@
 package user
 
 import (
-	"errors"
 	"log/slog"
 	"net/http"
 
@@ -33,28 +32,20 @@ func Register(group *gin.RouterGroup, mngr entities.UserManagment) {
 		user.HashPassword = utils.Sha256hash(user.HashPassword)
 
 		if err := mngr.InsertUser(user); err != nil {
-			slog.Error(err.Error())
-			ctx.JSON(http.StatusConflict, gin.H{
-				"error": "логин уже занят",
-			})
+			ctx.AbortWithError(http.StatusConflict, err)
 			return
 		}
 
 		u, err := mngr.User(user.Login)
 
 		if err != nil || u == nil {
-			slog.Error(err.Error())
-			ctx.AbortWithError(http.StatusInternalServerError,
-				errors.New("внутренняя ошибка сервера"))
+			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 
 		token, err := getToken(u)
 		if err != nil {
-			slog.Error(err.Error())
-			ctx.JSON(http.StatusInternalServerError, gin.H{
-				"error": "внутренняя ошибка сервера",
-			})
+			ctx.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 

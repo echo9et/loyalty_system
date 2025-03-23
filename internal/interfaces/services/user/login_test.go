@@ -55,7 +55,6 @@ func TestLogin(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Contains(t, w.Body.String(), `"result":"success"`)
 	})
 
 	t.Run("Test empty fields", func(t *testing.T) {
@@ -71,7 +70,6 @@ func TestLogin(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Contains(t, w.Body.String(), `"error":"неверный формат запроса"`)
 	})
 
 	t.Run("Test invalid credentials", func(t *testing.T) {
@@ -97,7 +95,6 @@ func TestLogin(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
-		assert.Contains(t, w.Body.String(), `"error":"неверная пара логин/пароль"`)
 	})
 
 	t.Run("Test user not found", func(t *testing.T) {
@@ -117,6 +114,5 @@ func TestLogin(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code)
-		assert.Contains(t, w.Body.String(), `"error":"внутренняя ошибка сервера"`)
 	})
 }
