@@ -1,8 +1,6 @@
 package interfaces
 
 import (
-	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -18,16 +16,15 @@ func MidlewareAuth(ctx *gin.Context) {
 
 	token, err := ctx.Cookie("token")
 	if err != nil {
-		slog.Error(fmt.Sprintf("MidlewareAuth not found token: %s, url:%s", err.Error(), ctx.Request.URL.Path))
-		ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
+		ctx.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
 	IDUser, err := utils.LoginFromToken(token)
 
 	if err != nil {
-		slog.Error(err.Error())
-		ctx.AbortWithError(http.StatusUnauthorized, errors.New("no unauthorized"))
+		ctx.AbortWithError(http.StatusUnauthorized, err)
+		return
 	}
 
 	ctx.Set("id_user", IDUser)
