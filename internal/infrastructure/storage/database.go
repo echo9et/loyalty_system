@@ -184,7 +184,7 @@ func (db *Database) Balance(idUser int) (*entities.Wallet, error) {
 
 	return &entities.Wallet{
 		ID:       idUser,
-		Balance:  float64(balance),
+		Balance:  float64(balance) - withdraw,
 		Withdraw: withdraw,
 	}, nil
 }
