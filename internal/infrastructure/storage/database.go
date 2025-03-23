@@ -191,15 +191,6 @@ func (db *Database) Balance(idUser int) (*entities.Wallet, error) {
 
 func (db *Database) Withdraw(w entities.Withdraw) error {
 
-	// order, err := db.Order(w.Order)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if order == nil || w.ID != order.IDUser {
-	// 	return entities.ErrIncorrectOrder
-	// }
-
 	wallet, err := db.Balance(w.ID)
 
 	if err != nil {
@@ -222,9 +213,8 @@ func (db *Database) Withdraw(w entities.Withdraw) error {
 
 func (db *Database) Withdraws(idUser int) ([]entities.Withdraw, error) {
 	var withdraws []entities.Withdraw
-
 	rows, err := db.conn.Query(
-		"SELECT id_user, number, accrual, date_created FROM orders WHERE id_user = $1 ORDER BY uploaded_at DESC", idUser)
+		"SELECT id_user, number, amount, date_created FROM withdraw WHERE id_user = $1 ORDER BY uploaded_at DESC", idUser)
 	if err != nil {
 		return nil, err
 	}
