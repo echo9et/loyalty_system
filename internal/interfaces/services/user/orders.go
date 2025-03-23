@@ -22,7 +22,7 @@ func isValid(number string) bool {
 	return true
 }
 
-func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
+func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment, a *AccrualSystem) {
 	group.POST("", func(ctx *gin.Context) {
 		body, err := io.ReadAll(ctx.Request.Body)
 		if err != nil {
@@ -85,6 +85,8 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 			return
 		}
 
+		go UpdateOrder(&newOrder, mngr, a)
+
 		ctx.JSON(http.StatusAccepted, gin.H{
 			"result": "ok",
 		})
@@ -93,7 +95,7 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 	group.GET("", func(ctx *gin.Context) {
 		token, err := ctx.Cookie("token")
 		if err != nil {
-			slog.Error(fmt.Sprintf("--- MidlewareAuth token %s", err))
+			slog.Error(fmt.Sprintf("MidlewareAuth token %s", err))
 			ctx.AbortWithError(http.StatusUnauthorized,
 				errors.New("пользователь не авторизован"))
 			return
@@ -120,6 +122,39 @@ func Orders(group *gin.RouterGroup, mngr entities.OrdersManagment) {
 			return
 		}
 
+		for _, order := range orders {
+			UpdateOrder(&order, mngr, a)
+		}
+
 		ctx.JSON(http.StatusOK, orders)
 	})
+}
+
+func UpdateOrder(order *entities.Order, mngr entities.OrdersManagment, a *AccrualSystem) {
+	if order.Status == entities.OrderProcessed || order.Status == entities.OrderInvalid {
+		return
+	}
+
+	newOrder, status, err := a.GetOrderInfo(order.Number)
+
+	if err != nil {
+		slog.Error(fmt.Sprintf("GetOrderInfo error %s", err.Error()))
+		return
+	}
+
+	if status != http.StatusOK {
+		slog.Error(fmt.Sprintf("GetOrderInfo status %d", status))
+		return
+	}
+	if newOrder.Status == order.Status {
+		return
+	}
+
+	order.Status = newOrder.Status
+	order.Accrual = int(newOrder.Accrual)
+	err = mngr.UpdateOrder(*order)
+
+	if err != nil {
+		slog.Error(fmt.Sprintf("update order %s", err.Error()))
+	}
 }

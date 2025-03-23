@@ -153,7 +153,7 @@ func (db *Database) AddOrder(order entities.Order) error {
 
 func (db *Database) UpdateOrder(order entities.Order) error {
 	_, err := db.conn.Exec(
-		"UPDATE orders SET status = $2, accural = $3, uploaded_at = $4 WHERE number = $1",
+		"UPDATE orders SET status = $2, accrual = $3, uploaded_at = $4 WHERE number = $1",
 		order.Number, order.Status, order.Accrual, time.Now())
 	if err != nil {
 		return err
