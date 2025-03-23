@@ -14,6 +14,9 @@ import (
 )
 
 func isValid(number string) bool {
+	if len(number) < 5 {
+		return false
+	}
 	for _, char := range number {
 		if !unicode.IsDigit(char) {
 			return false
